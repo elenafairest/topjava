@@ -7,15 +7,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface MealDao {
-    void addMeal(Meal meal);
+    void add(Meal meal);
 
-    void deleteMeal(int mealId);
+    void delete(int mealId);
 
-    void updateMeal(int mealId, LocalDateTime dateTime, String description, int calories);
+    void update(int id, Meal meal);
 
-    List<MealTo> getAllMeals();
+    List<Meal> getAll();
 
-    Meal getMealById(int mealId);
-
-    int generateMealId();
+    Meal getById(int mealId);
 }

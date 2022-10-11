@@ -20,11 +20,11 @@
     <tbody>
     <c:forEach items="${mealList}" var="meal">
         <tr style="color:${meal.excess ? 'red' : 'green'}">
-            <td>${f:formatLocalDateTime(meal.dateTime, 'yyyy-MM-dd HH:mm')}</td>
+            <td>${f:formatLocalDateTime(meal.dateTime)}</td>
             <td>${meal.description}
             <td>${meal.calories}</td>
-            <td><a href="meals?action=edit&mealId=<c:out value="${meal.id}"/>">Update</a></td>
-            <td><a href="meals?action=delete&mealId=<c:out value="${meal.id}"/>">Delete</a></td>
+            <td><a href="meals?action=edit&mealId=${meal.id}">Update</a></td>
+            <td><a href="meals?action=delete&mealId=${meal.id}">Delete</a></td>
         </tr>
     </c:forEach>
     </tbody>
