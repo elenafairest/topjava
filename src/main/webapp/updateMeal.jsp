@@ -1,4 +1,5 @@
 <%@ page import="java.time.LocalDateTime" %>
+<%@ page import="java.time.temporal.ChronoUnit" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <html>
@@ -13,7 +14,7 @@
     <input type="hidden" readonly="readonly" name="mealId" value="${meal.id}"/> <br/>
     Meal Date : <input
         type="datetime-local" name="dateTime"
-        value="${meal.dateTime != null ? meal.dateTime : LocalDateTime.now()}"/> <br/>
+        value="${meal.dateTime != null ? meal.dateTime : LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES)}"/> <br/>
     Description : <input
         type="text" name="description"
         value="${meal.description}"/> <br/>

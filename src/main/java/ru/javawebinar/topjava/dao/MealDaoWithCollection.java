@@ -3,13 +3,13 @@ package ru.javawebinar.topjava.dao;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.util.MealsUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class MealDaoWithCollectionStorage implements MealDao {
+public class MealDaoWithCollection implements MealDao {
     private final Map<Integer, Meal> mealCollection = new ConcurrentHashMap<>();
     private final AtomicInteger counter = new AtomicInteger(0);
 
@@ -18,33 +18,35 @@ public class MealDaoWithCollectionStorage implements MealDao {
     }
 
     @Override
-    public void add(Meal meal) {
-        meal.setId(generateId());
+    public Meal add(Meal meal) {
+        meal.setId(counter.incrementAndGet());
         mealCollection.put(meal.getId(), meal);
+        return meal;
     }
 
     @Override
-    public void delete(int mealId) {
-        mealCollection.remove(mealId);
+    public void delete(int id) {
+        mealCollection.remove(id);
     }
 
     @Override
-    public void update(int mealId, Meal meal) {
-        meal.setId(mealId);
-        mealCollection.put(mealId, meal);
+    public Meal update(Meal meal) {
+        if (mealCollection.containsKey(meal.getId())) {
+            mealCollection.put(meal.getId(), meal);
+            return meal;
+        } else {
+            throw new IllegalArgumentException();
+        }
     }
 
     @Override
     public List<Meal> getAll() {
-        return new CopyOnWriteArrayList<>(mealCollection.values());
+        return new ArrayList<>(mealCollection.values());
     }
 
     @Override
-    public Meal getById(int mealId) {
-        return mealCollection.get(mealId);
+    public Meal getById(int id) {
+        return mealCollection.get(id);
     }
 
-    private int generateId() {
-        return counter.incrementAndGet();
-    }
 }
