@@ -14,7 +14,7 @@
     <input type="hidden" readonly="readonly" name="mealId" value="${meal.id}"/> <br/>
     Meal Date : <input
         type="datetime-local" name="dateTime"
-        value="${meal.dateTime != null ? meal.dateTime : LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES)}"/> <br/>
+        value="${meal.id != null ? meal.dateTime : LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES)}"/> <br/>
     Description : <input
         type="text" name="description"
         value="${meal.description}"/> <br/>

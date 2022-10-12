@@ -31,12 +31,7 @@ public class MealDaoWithCollection implements MealDao {
 
     @Override
     public Meal update(Meal meal) {
-        if (mealCollection.containsKey(meal.getId())) {
-            mealCollection.put(meal.getId(), meal);
-            return meal;
-        } else {
-            throw new IllegalArgumentException();
-        }
+        return mealCollection.computeIfPresent(meal.getId(), (id, m) -> meal);
     }
 
     @Override

@@ -8,7 +8,7 @@ public class TimeUtil {
             return true;
         }
         if (startTime == null || endTime == null) {
-            return false;
+            throw new IllegalArgumentException();
         }
         return lt.compareTo(startTime) >= 0 && lt.compareTo(endTime) < 0;
     }
