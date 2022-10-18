@@ -25,37 +25,31 @@ public class InMemoryMealRepository implements MealRepository {
 
     @Override
     public Meal save(Meal meal, int userId) {
-        Map<Integer, Meal> userMeals = repository.computeIfAbsent(userId, ConcurrentHashMap::new);
+        Map<Integer, Meal> userMeals = repository.computeIfAbsent(userId, id -> new ConcurrentHashMap<>());
         if (meal.isNew()) {
             meal.setId(counter.incrementAndGet());
-            meal.setUserId(userId);
             userMeals.put(meal.getId(), meal);
             return meal;
         }
-        if (!checkUserId(userId, meal.getId())) {
+        if (!userMeals.containsKey(meal.getId())) {
             return null;
         }
-        meal.setUserId(userId);
         return userMeals.computeIfPresent(meal.getId(), (id, oldMeal) -> meal);
     }
 
     @Override
     public boolean delete(int id, int userId) {
-        return checkUserId(userId, id) && repository.get(userId).remove(id) != null;
+        Map<Integer, Meal> userMeals = repository.get(userId);
+        return userMeals != null && userMeals.remove(id) != null;
     }
 
     @Override
     public Meal get(int id, int userId) {
-        if (checkUserId(userId, id)) {
-            return repository.get(userId).get(id);
+        Map<Integer, Meal> userMeals = repository.get(userId);
+        if (userMeals != null) {
+            return userMeals.get(id);
         }
         return null;
-    }
-
-    private boolean checkUserId(int userId, int mealId) {
-        return repository.containsKey(userId) && repository.get(userId).containsKey(mealId)
-                && repository.get(userId).get(mealId) != null
-                && repository.get(userId).get(mealId).getUserId() == userId;
     }
 
     @Override
@@ -69,14 +63,13 @@ public class InMemoryMealRepository implements MealRepository {
     }
 
     private List<Meal> filterByPredicate(int userId, Predicate<Meal> filterByDate) {
-        return getForUser(userId).stream()
-                .filter(filterByDate)
-                .sorted(Comparator.comparing(Meal::getDateTime, Collections.reverseOrder()))
-                .collect(Collectors.toList());
+        Map<Integer, Meal> userMeals = repository.get(userId);
+        return userMeals == null || userMeals.values().isEmpty() ? Collections.emptyList() :
+                userMeals.values().stream()
+                        .filter(filterByDate)
+                        .sorted(Comparator.comparing(Meal::getDateTime, Collections.reverseOrder()))
+                        .collect(Collectors.toList());
     }
 
-    private Collection<Meal> getForUser(int userId) {
-        return repository.containsKey(userId) ? repository.get(userId).values() : Collections.emptyList();
-    }
 }
 
