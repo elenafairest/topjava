@@ -1,6 +1,7 @@
 package ru.javawebinar.topjava.repository.inmemory;
 
 import org.springframework.stereotype.Repository;
+import org.springframework.util.CollectionUtils;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.repository.MealRepository;
 import ru.javawebinar.topjava.util.DateTimeUtil;
@@ -30,9 +31,6 @@ public class InMemoryMealRepository implements MealRepository {
             meal.setId(counter.incrementAndGet());
             userMeals.put(meal.getId(), meal);
             return meal;
-        }
-        if (!userMeals.containsKey(meal.getId())) {
-            return null;
         }
         return userMeals.computeIfPresent(meal.getId(), (id, oldMeal) -> meal);
     }
@@ -64,7 +62,7 @@ public class InMemoryMealRepository implements MealRepository {
 
     private List<Meal> filterByPredicate(int userId, Predicate<Meal> filterByDate) {
         Map<Integer, Meal> userMeals = repository.get(userId);
-        return userMeals == null || userMeals.values().isEmpty() ? Collections.emptyList() :
+        return CollectionUtils.isEmpty(userMeals) || CollectionUtils.isEmpty(userMeals.values()) ? Collections.emptyList() :
                 userMeals.values().stream()
                         .filter(filterByDate)
                         .sorted(Comparator.comparing(Meal::getDateTime, Collections.reverseOrder()))
