@@ -35,10 +35,10 @@
             </tr>
             </thead>
             <tr>
-                <th><input type="date" name="startDate" value=<%= request.getParameter("startDate")%>></th>
-                <th><input type="date" name="endDate" value=<%= request.getParameter("endDate")%>></th>
-                <th><input type="time" name="startTime" value=<%= request.getParameter("startTime")%>></th>
-                <th><input type="time" name="endTime" value=<%= request.getParameter("endTime")%>></th>
+                <th><input type="date" name="startDate" value="${param.startDate}"></th>
+                <th><input type="date" name="endDate" value="${param.endDate}"></th>
+                <th><input type="time" name="startTime" value="${param.startTime}"></th>
+                <th><input type="time" name="endTime" value="${param.endTime}"></th>
             </tr>
         </table>
         <button type="submit">Filter</button>
