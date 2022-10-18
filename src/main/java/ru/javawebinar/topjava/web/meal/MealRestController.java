@@ -1,5 +1,7 @@
 package ru.javawebinar.topjava.web.meal;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import ru.javawebinar.topjava.model.Meal;
@@ -10,40 +12,49 @@ import ru.javawebinar.topjava.web.SecurityUtil;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Collection;
 import java.util.List;
 
 import static ru.javawebinar.topjava.util.ValidationUtil.assureIdConsistent;
+import static ru.javawebinar.topjava.util.ValidationUtil.checkNew;
 import static ru.javawebinar.topjava.web.SecurityUtil.authUserId;
 
 @Controller
 public class MealRestController {
-
+    private final Logger log = LoggerFactory.getLogger(getClass());
     @Autowired
     private MealService service;
 
-    public Collection<MealTo> getAll() {
+    public List<MealTo> getAll() {
+        log.info("getAll");
         return MealsUtil.getTos(service.getAll(authUserId()), SecurityUtil.authUserCaloriesPerDay());
     }
 
     public List<MealTo> getFiltered(LocalDate startDate, LocalDate endDate, LocalTime startTime, LocalTime endTime) {
-        return MealsUtil.getTos(service.getFiltered(authUserId(), startDate, endDate, startTime, endTime), SecurityUtil.authUserCaloriesPerDay());
+        log.info("getFiltered: startDate: {}, endDate: {}, startTime {}, endTime {}", startDate, endDate, startTime, endTime);
+        return MealsUtil.getFilteredTos(service.getAll(authUserId()),
+                service.getFiltered(authUserId(), startDate, endDate, startTime, endTime),
+                SecurityUtil.authUserCaloriesPerDay());
     }
 
     public void create(Meal meal) {
+        log.info("create {}", meal);
+        checkNew(meal);
         service.create(meal, authUserId());
     }
 
     public void update(Meal meal, int id) {
+        log.info("update {} with id={}", meal, id);
         assureIdConsistent(meal, id);
         service.update(meal, authUserId());
     }
 
     public Meal getById(int id) {
+        log.info("get {}", id);
         return service.get(id, authUserId());
     }
 
     public void delete(int id) {
+        log.info("delete {}", id);
         service.delete(id, authUserId());
     }
 }

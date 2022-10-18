@@ -23,8 +23,8 @@
     <h2>Meals</h2>
     <a href="meals?action=create">Add Meal</a>
     <br><br>
-    <form method="post" action="meals">
-        <input type="hidden" name="filter" value="1">
+    <form method="get" action="meals">
+        <input type="hidden" name="action" value="filter">
         <table border="0">
             <thead>
             <tr>
@@ -35,14 +35,14 @@
             </tr>
             </thead>
             <tr>
-                <th><input type="date" name="startDate"></th>
-                <th><input type="date" name="endDate"></th>
-                <th><input type="time" name="startTime"></th>
-                <th><input type="time" name="endTime"></th>
+                <th><input type="date" name="startDate" value=<%= request.getParameter("startDate")%>></th>
+                <th><input type="date" name="endDate" value=<%= request.getParameter("endDate")%>></th>
+                <th><input type="time" name="startTime" value=<%= request.getParameter("startTime")%>></th>
+                <th><input type="time" name="endTime" value=<%= request.getParameter("endTime")%>></th>
             </tr>
         </table>
         <button type="submit">Filter</button>
-        <button onclick="window.history.back()" type="button">Cancel</button>
+        <input type="button" name="cancel" value="Cancel" onclick="window.location.href='meals'"/>
     </form>
     <br>
     <table border="1" cellpadding="8" cellspacing="0">

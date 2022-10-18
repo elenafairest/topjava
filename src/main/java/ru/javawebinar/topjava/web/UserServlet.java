@@ -25,6 +25,6 @@ public class UserServlet extends HttpServlet {
         int userId = Integer.parseInt(user);
         log.info("Login as user with id: {}", userId);
         SecurityUtil.setAuthUserId(userId);
-        response.sendRedirect("users");
+        response.sendRedirect("meals");
     }
 }
