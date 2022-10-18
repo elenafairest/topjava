@@ -62,7 +62,7 @@ public class InMemoryMealRepository implements MealRepository {
 
     private List<Meal> filterByPredicate(int userId, Predicate<Meal> filterByDate) {
         Map<Integer, Meal> userMeals = repository.get(userId);
-        return CollectionUtils.isEmpty(userMeals) || CollectionUtils.isEmpty(userMeals.values()) ? Collections.emptyList() :
+        return CollectionUtils.isEmpty(userMeals) ? Collections.emptyList() :
                 userMeals.values().stream()
                         .filter(filterByDate)
                         .sorted(Comparator.comparing(Meal::getDateTime, Collections.reverseOrder()))
