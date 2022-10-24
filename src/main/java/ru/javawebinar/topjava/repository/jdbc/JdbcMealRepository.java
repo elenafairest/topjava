@@ -23,11 +23,11 @@ public class JdbcMealRepository implements MealRepository {
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-    private final SimpleJdbcInsert insertUser;
+    private final SimpleJdbcInsert insertMeal;
 
     @Autowired
     public JdbcMealRepository(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
-        this.insertUser = new SimpleJdbcInsert(jdbcTemplate)
+        this.insertMeal = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("meals")
                 .usingGeneratedKeyColumns("id");
 
@@ -45,7 +45,7 @@ public class JdbcMealRepository implements MealRepository {
                 .addValue("userId", userId);
 
         if (meal.isNew()) {
-            Number newKey = insertUser.executeAndReturnKey(map);
+            Number newKey = insertMeal.executeAndReturnKey(map);
             meal.setId(newKey.intValue());
         } else if (namedParameterJdbcTemplate.update(
                 "UPDATE meals SET date_time=:dateTime, description=:description, calories=:calories " +
@@ -62,8 +62,8 @@ public class JdbcMealRepository implements MealRepository {
 
     @Override
     public Meal get(int id, int userId) {
-        List<Meal> meals = jdbcTemplate.query("SELECT * FROM meals WHERE id=? AND user_id=?"
-                , ROW_MAPPER, id, userId);
+        List<Meal> meals = jdbcTemplate.query("SELECT * FROM meals WHERE id=? AND user_id=?",
+                ROW_MAPPER, id, userId);
         return DataAccessUtils.singleResult(meals);
     }
 
