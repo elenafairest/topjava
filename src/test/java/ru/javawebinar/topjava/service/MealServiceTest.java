@@ -3,7 +3,11 @@ package ru.javawebinar.topjava.service;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
+import org.junit.runners.model.Statement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.test.context.ContextConfiguration;
@@ -28,11 +32,25 @@ import static ru.javawebinar.topjava.UserTestData.USER_ID;
 @RunWith(SpringRunner.class)
 @Sql(scripts = "classpath:db/populateDB.sql", config = @SqlConfig(encoding = "UTF-8"))
 public class MealServiceTest {
+    private static final Logger log = LoggerFactory.getLogger(MealServiceTest.class);
+
+    public static final StringBuilder executionTimeLog = new StringBuilder();
+
     @ClassRule
-    public static TestExecutionTimeLogger classTestExecutionTimeLogger = new TestExecutionTimeLogger();
+    public static TestRule classTestExecutionTimeLogger = (statement, description) -> new Statement() {
+        @Override
+        public void evaluate() throws Throwable {
+            try {
+                statement.evaluate();
+            } finally {
+                log.info("{}", executionTimeLog);
+            }
+        }
+    };
 
     @Rule
     public TestExecutionTimeLogger testExecutionTimeLogger = new TestExecutionTimeLogger();
+
     @Autowired
     private MealService service;
 

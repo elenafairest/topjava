@@ -1,42 +1,47 @@
 package ru.javawebinar.topjava.model;
 
+import org.hibernate.validator.constraints.Range;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @NamedQueries({
         @NamedQuery(name = Meal.DELETE, query = "DELETE FROM Meal m WHERE m.id=:id AND m.user.id=:userId"),
-        @NamedQuery(name = Meal.GET_BY_ID, query = "SELECT m FROM Meal m LEFT JOIN FETCH m.user WHERE m.id=:id AND m.user.id=:userId"),
-        @NamedQuery(name = Meal.ALL_SORTED, query = "SELECT m FROM Meal m LEFT JOIN FETCH m.user WHERE m.user.id=:userId ORDER BY m.dateTime DESC"),
-        @NamedQuery(name = Meal.FILTERED_BY_DATE, query = "SELECT m FROM Meal m LEFT JOIN FETCH m.user WHERE m.user.id=:userId AND m.dateTime >=:startDateTime AND m.dateTime <:endDateTime ORDER BY m.dateTime DESC"),
+        @NamedQuery(name = Meal.ALL_SORTED, query = "SELECT m FROM Meal m WHERE m.user.id=:userId " +
+                "ORDER BY m.dateTime DESC"),
+        @NamedQuery(name = Meal.FILTERED_BY_DATE, query = "SELECT m FROM Meal m WHERE m.user.id=:userId " +
+                "AND m.dateTime >=:startDateTime AND m.dateTime <:endDateTime ORDER BY m.dateTime DESC"),
 })
 @Entity
 @Table(name = "meals", uniqueConstraints = {
-        @UniqueConstraint(name = "meals_unique_user_datetime_idx", columnNames =
-                {"user_id", "date_time"})
+        @UniqueConstraint(name = "meals_unique_user_datetime_idx", columnNames = {"user_id", "date_time"})
 })
 public class Meal extends AbstractBaseEntity {
     public static final String DELETE = "Meal.delete";
-    public static final String GET_BY_ID = "Meal.getById";
     public static final String ALL_SORTED = "Meal.getAllSorted";
     public static final String FILTERED_BY_DATE = "Meal.filteredByDate";
+
     @Column(name = "date_time", nullable = false)
     @NotNull
     private LocalDateTime dateTime;
 
     @Column(name = "description", nullable = false)
     @NotBlank
+    @Size(min = 2, max = 120)
     private String description;
 
     @Column(name = "calories", nullable = false)
-    @NotNull
+    @Range(min = 10, max = 5000)
     private int calories;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
+    @NotNull
     private User user;
 
     public Meal() {
