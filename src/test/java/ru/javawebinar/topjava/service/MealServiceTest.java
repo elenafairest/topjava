@@ -1,11 +1,11 @@
 package ru.javawebinar.topjava.service;
 
-import org.junit.ClassRule;
+import org.junit.AfterClass;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TestRule;
+import org.junit.rules.Stopwatch;
+import org.junit.runner.Description;
 import org.junit.runner.RunWith;
-import org.junit.runners.model.Statement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +19,7 @@ import ru.javawebinar.topjava.util.exception.NotFoundException;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertThrows;
 import static ru.javawebinar.topjava.MealTestData.*;
@@ -36,20 +37,16 @@ public class MealServiceTest {
 
     public static final StringBuilder executionTimeLog = new StringBuilder();
 
-    @ClassRule
-    public static TestRule classTestExecutionTimeLogger = (statement, description) -> new Statement() {
+    @Rule
+    public Stopwatch testExecutionTimeLogger = new Stopwatch() {
         @Override
-        public void evaluate() throws Throwable {
-            try {
-                statement.evaluate();
-            } finally {
-                log.info("{}", executionTimeLog);
-            }
+        protected void finished(long nanos, Description description) {
+            String testName = description.getMethodName();
+            long runTime = TimeUnit.NANOSECONDS.toMillis(nanos);
+            executionTimeLog.append(String.format("%n%-23s - %d ms", testName, runTime));
+            log.info("{} - {} ms", testName, runTime);
         }
     };
-
-    @Rule
-    public TestExecutionTimeLogger testExecutionTimeLogger = new TestExecutionTimeLogger();
 
     @Autowired
     private MealService service;
@@ -131,5 +128,10 @@ public class MealServiceTest {
     @Test
     public void getBetweenWithNullDates() {
         MEAL_MATCHER.assertMatch(service.getBetweenInclusive(null, null, USER_ID), meals);
+    }
+
+    @AfterClass
+    public static void logExecutionTime() {
+        log.info("{}\n", executionTimeLog);
     }
 }
