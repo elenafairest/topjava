@@ -37,7 +37,7 @@ public abstract class AbstractServiceTest {
     public Stopwatch stopwatch = TimingRules.STOPWATCH;
 
     @Autowired
-    Environment env;
+    private Environment env;
 
     public boolean isJdbc() {
         return Arrays.asList(env.getActiveProfiles()).contains(Profiles.JDBC);

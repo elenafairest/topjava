@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import ru.javawebinar.topjava.model.Role;
 import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.repository.UserRepository;
@@ -60,20 +61,23 @@ public class JdbcUserRepository implements UserRepository {
             }
             jdbcTemplate.update("DELETE FROM user_roles  WHERE user_id=?", user.getId());
         }
-        Role[] userRoles = user.getRoles().toArray(new Role[0]);
-        jdbcTemplate.batchUpdate("INSERT INTO user_roles (user_id, role) VALUES (?,?)", new BatchPreparedStatementSetter() {
+        Set<Role> roleSet = user.getRoles();
+        if (!CollectionUtils.isEmpty(roleSet)) {
+            Role[] userRoles = roleSet.toArray(new Role[0]);
+            jdbcTemplate.batchUpdate("INSERT INTO user_roles (user_id, role) VALUES (?,?)", new BatchPreparedStatementSetter() {
 
-            @Override
-            public void setValues(PreparedStatement ps, int i) throws SQLException {
-                ps.setInt(1, user.getId());
-                ps.setString(2, userRoles[i].name());
-            }
+                @Override
+                public void setValues(PreparedStatement ps, int i) throws SQLException {
+                    ps.setInt(1, user.getId());
+                    ps.setString(2, userRoles[i].name());
+                }
 
-            @Override
-            public int getBatchSize() {
-                return user.getRoles().size();
-            }
-        });
+                @Override
+                public int getBatchSize() {
+                    return user.getRoles().size();
+                }
+            });
+        }
         return user;
     }
 
@@ -86,22 +90,14 @@ public class JdbcUserRepository implements UserRepository {
     @Override
     public User get(int id) {
         List<User> users = jdbcTemplate.query("SELECT * FROM users WHERE id=?", ROW_MAPPER, id);
-        User foundUser = DataAccessUtils.singleResult(users);
-        if (foundUser != null) {
-            foundUser.setRoles(getUserRoles(foundUser.getId()));
-        }
-        return foundUser;
+        return getUserWithRoles(DataAccessUtils.singleResult(users));
     }
 
     @Override
     public User getByEmail(String email) {
 //        return jdbcTemplate.queryForObject("SELECT * FROM users WHERE email=?", ROW_MAPPER, email);
         List<User> users = jdbcTemplate.query("SELECT * FROM users WHERE email=?", ROW_MAPPER, email);
-        User foundUser = DataAccessUtils.singleResult(users);
-        if (foundUser != null) {
-            foundUser.setRoles(getUserRoles(foundUser.getId()));
-        }
-        return foundUser;
+        return getUserWithRoles(DataAccessUtils.singleResult(users));
     }
 
     @Override
@@ -112,8 +108,12 @@ public class JdbcUserRepository implements UserRepository {
         return foundUsers;
     }
 
-    private List<Role> getUserRoles(int userId) {
-        return jdbcTemplate.queryForList("SELECT role FROM user_roles  WHERE user_id=?", Role.class, userId);
+    private User getUserWithRoles(User user) {
+        if (user != null) {
+            List<Role> roles = jdbcTemplate.queryForList("SELECT role FROM user_roles  WHERE user_id=?", Role.class, user.getId());
+            user.setRoles(roles);
+        }
+        return user;
     }
 
     private Map<Integer, Set<Role>> getAllUsersRoles() {
