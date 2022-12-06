@@ -29,11 +29,11 @@
                 <dt><spring:message code="meal.endTime"/>:</dt>
                 <dd><input type="time" name="endTime" value="${param.endTime}"></dd>
             </dl>
-            <button class="btn btn-primary" onclick="ctx.updateTable()">
+            <button type="button" class="btn btn-primary" onclick="ctx.updateTable()">
                 <span class="fa fa-filter"></span>
                 <spring:message code="meal.filter"/>
             </button>
-            <button class="btn btn-primary" onclick="clearFilter()">
+            <button type="button" class="btn btn-primary" onclick="clearFilter()">
                 <span class="fa fa-remove"></span>
                 <spring:message code="common.cancel"/>
             </button>
