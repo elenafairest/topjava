@@ -1,5 +1,6 @@
 package ru.javawebinar.topjava.repository;
 
+import org.springframework.transaction.annotation.Transactional;
 import ru.javawebinar.topjava.model.User;
 
 import java.util.List;
@@ -21,5 +22,12 @@ public interface UserRepository {
 
     default User getWithMeals(int id) {
         throw new UnsupportedOperationException();
+    }
+
+    @Transactional
+    default User enable(int id, boolean enabled) {
+        User user = get(id);
+        user.setEnabled(enabled);
+        return save(user);
     }
 }
