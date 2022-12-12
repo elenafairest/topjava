@@ -23,11 +23,15 @@ function updateRow(id) {
     $("#modalTitle").html(i18n["editTitle"]);
     $.get(ctx.ajaxUrl + id, function (data) {
         $.each(data, function (key, value) {
-            let transformedValue = key === "dateTime" ? value.replace('T', ' ').substring(0, 16) : value;
+            let transformedValue = key === "dateTime" ? format(value) : value;
             form.find("input[name='" + key + "']").val(transformedValue);
         });
         $('#editRow').modal();
     });
+}
+
+function format(data) {
+    return data.replace('T', ' ').substring(0, 16);
 }
 
 function deleteRow(id) {
