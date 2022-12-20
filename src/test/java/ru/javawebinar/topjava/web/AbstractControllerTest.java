@@ -2,6 +2,7 @@ package ru.javawebinar.topjava.web;
 
 import org.junit.jupiter.api.Assumptions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
@@ -17,6 +18,8 @@ import ru.javawebinar.topjava.Profiles;
 
 import javax.annotation.PostConstruct;
 
+import java.util.Locale;
+
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 
 
@@ -30,6 +33,7 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 @Transactional
 @ActiveProfiles(resolver = ActiveDbProfileResolver.class, profiles = Profiles.REPOSITORY_IMPLEMENTATION)
 public abstract class AbstractControllerTest {
+    protected static final Locale LOCALE_RU = new Locale("ru");
 
     private static final CharacterEncodingFilter CHARACTER_ENCODING_FILTER = new CharacterEncodingFilter();
 
@@ -45,6 +49,9 @@ public abstract class AbstractControllerTest {
 
     @Autowired
     private WebApplicationContext webApplicationContext;
+
+    @Autowired
+    protected MessageSourceAccessor messageSourceAccessor;
 
     public void assumeDataJpa() {
         Assumptions.assumeTrue(env.acceptsProfiles(org.springframework.core.env.Profiles.of(Profiles.DATAJPA)), "DATA-JPA only");
