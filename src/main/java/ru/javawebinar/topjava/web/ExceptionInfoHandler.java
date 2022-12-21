@@ -10,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -74,20 +73,14 @@ public class ExceptionInfoHandler {
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     @ExceptionHandler(BindException.class)
     public ErrorInfo bindException(HttpServletRequest req, BindException e) {
-        return new ErrorInfo(req.getRequestURL(), VALIDATION_ERROR, getErrors(e).toString());
+        return logAndGetErrorInfo(req, e, false, VALIDATION_ERROR, getErrors(e).toArray(new String[0]));
     }
 
-    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ErrorInfo handleMethodArgumentNotValidException(HttpServletRequest req, MethodArgumentNotValidException e) {
-        return new ErrorInfo(req.getRequestURL(), VALIDATION_ERROR, getErrors(e).toString());
-    }
-
-    private static List<String> getErrors(BindException e) {
+    private List<String> getErrors(BindException e) {
         List<String> errors = new ArrayList<>();
         for (FieldError error : e.getBindingResult().getFieldErrors()) {
             log.error(error.toString());
-            errors.add(error.getField() + ": " + error.getDefaultMessage());
+            errors.add(messageSourceAccessor.getMessage(error));
         }
         return errors;
     }
@@ -106,8 +99,8 @@ public class ExceptionInfoHandler {
         } else {
             log.warn("{} at request  {}: {}", errorType, req.getRequestURL(), rootCause.toString());
         }
-        if (message != null && message.length != 0) {
-            return new ErrorInfo(req.getRequestURL(), errorType, message[0]);
+        if (message.length != 0) {
+            return new ErrorInfo(req.getRequestURL(), errorType, message);
         }
         return new ErrorInfo(req.getRequestURL(), errorType, rootCause.getLocalizedMessage());
     }

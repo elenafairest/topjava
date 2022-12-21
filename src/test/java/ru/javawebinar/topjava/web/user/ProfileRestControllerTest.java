@@ -18,6 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static ru.javawebinar.topjava.TestUtil.userHttpBasic;
 import static ru.javawebinar.topjava.UserTestData.*;
+import static ru.javawebinar.topjava.util.exception.ErrorType.VALIDATION_ERROR;
 import static ru.javawebinar.topjava.web.ExceptionInfoHandler.EXCEPTION_DUPLICATE_EMAIL;
 import static ru.javawebinar.topjava.web.user.ProfileRestController.REST_URL;
 
@@ -68,7 +69,7 @@ class ProfileRestControllerTest extends AbstractControllerTest {
 
     @Test
     void update() throws Exception {
-        UserTo updatedTo = new UserTo(null, "newName", "user@yandex.ru", "newPassword", 1500);
+        UserTo updatedTo = new UserTo(USER_ID, "newName", "user@yandex.ru", "newPassword", 1500);
         perform(MockMvcRequestBuilders.put(REST_URL).contentType(MediaType.APPLICATION_JSON)
                 .with(userHttpBasic(user))
                 .content(JsonUtil.writeValue(updatedTo)))
@@ -105,7 +106,8 @@ class ProfileRestControllerTest extends AbstractControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(userHttpBasic(user))
                 .content(JsonUtil.writeValue(updatedTo)))
-                .andExpect(status().isUnprocessableEntity());
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.type").value(VALIDATION_ERROR.name()));
     }
 
     @Test
@@ -116,7 +118,8 @@ class ProfileRestControllerTest extends AbstractControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(userHttpBasic(user))
                 .content(JsonUtil.writeValue(updatedTo)))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.detail").value(messageSourceAccessor.getMessage(EXCEPTION_DUPLICATE_EMAIL, LOCALE_RU)));
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.details").value(messageSourceAccessor.getMessage(EXCEPTION_DUPLICATE_EMAIL, LOCALE_RU)))
+                .andExpect(jsonPath("$.type").value(VALIDATION_ERROR.name()));
     }
 }

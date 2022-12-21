@@ -24,6 +24,7 @@ import static ru.javawebinar.topjava.UserTestData.USER_ID;
 import static ru.javawebinar.topjava.UserTestData.user;
 import static ru.javawebinar.topjava.util.MealsUtil.createTo;
 import static ru.javawebinar.topjava.util.MealsUtil.getTos;
+import static ru.javawebinar.topjava.util.exception.ErrorType.VALIDATION_ERROR;
 import static ru.javawebinar.topjava.web.ExceptionInfoHandler.EXCEPTION_DUPLICATE_DATETIME;
 
 class MealRestControllerTest extends AbstractControllerTest {
@@ -134,7 +135,8 @@ class MealRestControllerTest extends AbstractControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(userHttpBasic(user))
                 .content(JsonUtil.writeValue(getNewNotValid())))
-                .andExpect(status().isUnprocessableEntity());
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.type").value(VALIDATION_ERROR.name()));
     }
 
     @Test
@@ -143,7 +145,8 @@ class MealRestControllerTest extends AbstractControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(userHttpBasic(user))
                 .content(JsonUtil.writeValue(getUpdatedNotValid())))
-                .andExpect(status().isUnprocessableEntity());
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.type").value(VALIDATION_ERROR.name()));
     }
 
 
@@ -155,7 +158,8 @@ class MealRestControllerTest extends AbstractControllerTest {
                 .content(JsonUtil.writeValue(getUpdatedDuplicatedDateTime()))
                 .with(userHttpBasic(user)))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.detail").value(messageSourceAccessor.getMessage(EXCEPTION_DUPLICATE_DATETIME, LOCALE_RU)));
+                .andExpect(jsonPath("$.details").value(messageSourceAccessor.getMessage(EXCEPTION_DUPLICATE_DATETIME, LOCALE_RU)))
+                .andExpect(jsonPath("$.type").value(VALIDATION_ERROR.name()));
     }
 
     @Test
@@ -166,6 +170,7 @@ class MealRestControllerTest extends AbstractControllerTest {
                 .content(JsonUtil.writeValue(getNewDuplicatedDateTime()))
                 .with(userHttpBasic(user)))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.detail").value(messageSourceAccessor.getMessage(EXCEPTION_DUPLICATE_DATETIME, LOCALE_RU)));
+                .andExpect(jsonPath("$.details").value(messageSourceAccessor.getMessage(EXCEPTION_DUPLICATE_DATETIME, LOCALE_RU)))
+                .andExpect(jsonPath("$.type").value(VALIDATION_ERROR.name()));
     }
 }

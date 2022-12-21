@@ -18,6 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static ru.javawebinar.topjava.TestUtil.userHttpBasic;
 import static ru.javawebinar.topjava.UserTestData.*;
+import static ru.javawebinar.topjava.util.exception.ErrorType.VALIDATION_ERROR;
 import static ru.javawebinar.topjava.web.ExceptionInfoHandler.EXCEPTION_DUPLICATE_EMAIL;
 
 class AdminRestControllerTest extends AbstractControllerTest {
@@ -151,7 +152,8 @@ class AdminRestControllerTest extends AbstractControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(userHttpBasic(admin))
                 .content(jsonWithPassword(getNewNotValid(), "newPass")))
-                .andExpect(status().isUnprocessableEntity());
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.type").value(VALIDATION_ERROR.name()));
     }
 
     @Test
@@ -160,7 +162,8 @@ class AdminRestControllerTest extends AbstractControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(userHttpBasic(admin))
                 .content(jsonWithPassword(getUpdatedNotValid(), "newPass")))
-                .andExpect(status().isUnprocessableEntity());
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.type").value(VALIDATION_ERROR.name()));
     }
 
     @Test
@@ -170,8 +173,9 @@ class AdminRestControllerTest extends AbstractControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(userHttpBasic(admin))
                 .content(jsonWithPassword(getNewDuplicatedEmail(), "newPass")))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.detail").value(messageSourceAccessor.getMessage(EXCEPTION_DUPLICATE_EMAIL, LOCALE_RU)));
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.details").value(messageSourceAccessor.getMessage(EXCEPTION_DUPLICATE_EMAIL, LOCALE_RU)))
+                .andExpect(jsonPath("$.type").value(VALIDATION_ERROR.name()));
     }
 
     @Test
@@ -181,7 +185,8 @@ class AdminRestControllerTest extends AbstractControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .with(userHttpBasic(admin))
                 .content(jsonWithPassword(getUpdatedDuplicatedEmail(), "newPass")))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.detail").value(messageSourceAccessor.getMessage(EXCEPTION_DUPLICATE_EMAIL, LOCALE_RU)));
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.details").value(messageSourceAccessor.getMessage(EXCEPTION_DUPLICATE_EMAIL, LOCALE_RU)))
+                .andExpect(jsonPath("$.type").value(VALIDATION_ERROR.name()));
     }
 }
