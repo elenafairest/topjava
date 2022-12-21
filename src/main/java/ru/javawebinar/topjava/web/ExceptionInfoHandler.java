@@ -73,16 +73,21 @@ public class ExceptionInfoHandler {
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     @ExceptionHandler(BindException.class)
     public ErrorInfo bindException(HttpServletRequest req, BindException e) {
-        return logAndGetErrorInfo(req, e, false, VALIDATION_ERROR, getErrors(e).toArray(new String[0]));
+        return logAndGetErrorInfo(req, e, false, VALIDATION_ERROR, getErrors(e));
     }
 
-    private List<String> getErrors(BindException e) {
+    private String[] getErrors(BindException e) {
         List<String> errors = new ArrayList<>();
         for (FieldError error : e.getBindingResult().getFieldErrors()) {
             log.error(error.toString());
-            errors.add(messageSourceAccessor.getMessage(error));
+            String message = messageSourceAccessor.getMessage(error);
+            if (messageSourceAccessor.getMessage(EXCEPTION_DUPLICATE_EMAIL).equals(message)) {
+                errors.add(message);
+            } else {
+                errors.add(String.format("[%s] %s", error.getField(), message));
+            }
         }
-        return errors;
+        return errors.toArray(new String[0]);
     }
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
